@@ -5,8 +5,8 @@
 .COMPANYNAME
 .COPYRIGHT
 .TAGS KeyTab Ktpass Key Tab
-.LICENSEURI https://github.com/TheRealAdamBurford/Create-KeyTab/blob/master/LICENSE
-.PROJECTURI https://github.com/TheRealAdamBurford/Create-KeyTab
+.LICENSEURI https://github.com/waikinw/PSKeyTab/blob/main/LICENSE
+.PROJECTURI https://github.com/waikinw/PSKeyTab
 .ICONURI
 .EXTERNALMODULEDEPENDENCIES 
 .REQUIREDSCRIPTS

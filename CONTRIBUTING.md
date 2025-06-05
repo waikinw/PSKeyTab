@@ -14,6 +14,6 @@ Thank you for considering contributing to KeyTabTools!
    ```
 
 ## Pull requests
-- Create a feature branch based on `master`.
+- Create a feature branch based on `main`.
 - Include tests for new functionality.
 - Ensure `Invoke-Pester` succeeds before submitting.
