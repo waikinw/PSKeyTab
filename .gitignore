@@ -1,0 +1,25 @@
+# Ignore macOS metadata
+.DS_Store
+
+# Ignore Windows thumbnail database
+Thumbs.db
+Desktop.ini
+
+# Ignore PowerShell temporary files
+*.ps1~
+*.ps1.tmp
+
+# Ignore log and backup files
+*.log
+*.bak
+
+# Ignore editor swap files
+*.swp
+*.swo
+
+# Ignore build artifacts
+bin/
+obj/
+
+# Ignore site build output
+/docs/_site/
