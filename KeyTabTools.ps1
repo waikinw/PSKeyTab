@@ -97,24 +97,21 @@ Use -QUIET and -NOPROMPT for batch mode processing.
 .LINK
 https://www.linkedin.com/in/adamburford
 #>
-if ($MyInvocation.InvocationName -ne ".") {
 param (
-[Parameter(Mandatory=$true,HelpMessage="REALM name will be forced to Upper Case")]$Realm,
-[Parameter(Mandatory=$true,HelpMessage="Principal is case sensative. It must match the principal portion of the UPN",ValueFromPipelineByPropertyName=$true)]$Principal,
-[Parameter(Mandatory=$false)]$Password,
-[Parameter(Mandatory=$false)]$SALT,
-[Parameter(Mandatory=$false)]$File,
-[Parameter(Mandatory=$false,ValueFromPipelineByPropertyName=$true)][int]$KVNO,
-[Parameter(Mandatory=$false)][ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PType="KRB5_NT_PRINCIPAL",
-[Parameter(Mandatory=$false)][Switch]$RC4,
-[Parameter(Mandatory=$false)][Switch]$AES128,
-[Parameter(Mandatory=$false)][Switch]$AES256,
-[Parameter(Mandatory=$false)][Switch]$Append,
-[Parameter(Mandatory=$false)][Switch]$Quiet,
-[Parameter(Mandatory=$false)][Switch]$NoPrompt
+    [string]$Realm,
+    [string]$Principal,
+    [string]$Password,
+    [string]$SALT,
+    [string]$File,
+    [int]$KVNO,
+    [ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PType="KRB5_NT_PRINCIPAL",
+    [switch]$RC4,
+    [switch]$AES128,
+    [switch]$AES256,
+    [switch]$Append,
+    [switch]$Quiet,
+    [switch]$NoPrompt
 )
-
-}
 
 function Get-MD4{
     PARAM(
@@ -611,10 +608,28 @@ return $password
 }
 
 
-if ($MyInvocation.InvocationName -ne ".") {
-if ([string]::IsNullOrEmpty($Password)){$Password = $(Get-Password)}
+function Invoke-KeyTabTools {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true,HelpMessage="REALM name will be forced to Upper Case")]$Realm,
+        [Parameter(Mandatory=$true,HelpMessage="Principal is case sensative. It must match the principal portion of the UPN",ValueFromPipelineByPropertyName=$true)]$Principal,
+        [Parameter(Mandatory=$false)]$Password,
+        [Parameter(Mandatory=$false)]$SALT,
+        [Parameter(Mandatory=$false)]$File,
+        [Parameter(Mandatory=$false,ValueFromPipelineByPropertyName=$true)][int]$KVNO,
+        [Parameter(Mandatory=$false)][ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PType="KRB5_NT_PRINCIPAL",
+        [Parameter(Mandatory=$false)][Switch]$RC4,
+        [Parameter(Mandatory=$false)][Switch]$AES128,
+        [Parameter(Mandatory=$false)][Switch]$AES256,
+        [Parameter(Mandatory=$false)][Switch]$Append,
+        [Parameter(Mandatory=$false)][Switch]$Quiet,
+    [Parameter(Mandatory=$false)][Switch]$NoPrompt
+    )
 
-if ([string]::IsNullOrEmpty($File)){$File=$(Get-Location).Path+'\login.keytab'}
+
+    if ([string]::IsNullOrEmpty($Password)) { $Password = Get-Password }
+
+    if ([string]::IsNullOrEmpty($File)) { $File = Join-Path -Path (Get-Location) -ChildPath "login.keytab" }
 
 if($Quiet) {
 $Script:Silent = $true
@@ -716,4 +731,7 @@ $fileBytes += $keyTabEntries
 [System.IO.File]::WriteAllBytes($File,$fileBytes)
 }
 }
-Export-ModuleMember -Function Get-MD4,Get-PBKDF2,Protect-Aes,Get-AES128Key,Get-AES256Key,Get-HexStringFromByteArray,Get-ByteArrayFromHexString,Get-BytesBigEndian,Get-PrincipalType,New-KeyTabEntry
+
+if ($MyInvocation.InvocationName -ne ".") {
+    Invoke-KeyTabTools @PSBoundParameters
+}
