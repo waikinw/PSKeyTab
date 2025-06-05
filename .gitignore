@@ -6,6 +6,7 @@ obj/
 
 # Logs and transient files
 *.log
+*.bak
 *.tmp
 *.cache
 
@@ -18,3 +19,20 @@ TestResults/
 # Pester output
 tests/Output/
 
+# Ignore macOS metadata
+.DS_Store
+
+# Ignore Windows thumbnail database
+Thumbs.db
+Desktop.ini
+
+# Ignore PowerShell temporary files
+*.ps1~
+*.ps1.tmp
+
+# Ignore editor swap files
+*.swp
+*.swo
+
+# Ignore site build output
+/docs/_site/
