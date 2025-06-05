@@ -104,7 +104,7 @@ param (
 [Parameter(Mandatory=$false)]$Password,
 [Parameter(Mandatory=$false)]$SALT,
 [Parameter(Mandatory=$false)]$File,
-[Parameter(Mandatory=$false,ValueFromPipelineByPropertyName=$true)]$KVNO=1,
+[Parameter(Mandatory=$false,ValueFromPipelineByPropertyName=$true)][int]$KVNO,
 [Parameter(Mandatory=$false)][ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PType="KRB5_NT_PRINCIPAL",
 [Parameter(Mandatory=$false)][Switch]$RC4,
 [Parameter(Mandatory=$false)][Switch]$AES128,
@@ -113,6 +113,7 @@ param (
 [Parameter(Mandatory=$false)][Switch]$Quiet,
 [Parameter(Mandatory=$false)][Switch]$NoPrompt
 )
+
 }
 
 function Get-MD4{
