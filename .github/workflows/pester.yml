@@ -1,0 +1,12 @@
+name: Pester Tests
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -Force -Scope CurrentUser
+          Invoke-Pester -Output Detailed

@@ -1,3 +1,24 @@
+# Build artifacts
+bin/
+obj/
+*.nupkg
+*.zip
+
+# Logs and transient files
+*.log
+*.bak
+*.tmp
+*.cache
+
+# IDE settings
+.vscode/
+.idea/
+
+# Test results
+TestResults/
+# Pester output
+tests/Output/
+
 # Ignore macOS metadata
 .DS_Store
 
@@ -9,17 +30,9 @@ Desktop.ini
 *.ps1~
 *.ps1.tmp
 
-# Ignore log and backup files
-*.log
-*.bak
-
 # Ignore editor swap files
 *.swp
 *.swo
-
-# Ignore build artifacts
-bin/
-obj/
 
 # Ignore site build output
 /docs/_site/
