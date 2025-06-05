@@ -307,7 +307,7 @@ Write-Host "SALT (HEX):"$hexStringSALT -ForegroundColor Yellow
 return $deriveBytes.GetBytes($size)
 }
 
-function Encrypt-AES {
+function Protect-Aes {
 param (
 [Parameter(Mandatory=$true)]$KeyData,
 [Parameter(Mandatory=$true)]$IVData,
@@ -318,12 +318,12 @@ param (
 
 ### AES 128-CTS
 # KeySize = 16
-# AESKey = Encrypt-AES -KeyData PBKdf2 -IVData IV -Data NFoldText
+# AESKey = Protect-Aes -KeyData PBKdf2 -IVData IV -Data NFoldText
 
 ### AES 256-CTS
 # KeySize = 32
-# K1 = Encrypt-AES -KeyData PBKdf2 -IVData IV -Data NFoldText
-# K2 = Encrypt-AES -KeyData PBKdf2 -IVData IV -Data K1
+# K1 = Protect-Aes -KeyData PBKdf2 -IVData IV -Data NFoldText
+# K2 = Protect-Aes -KeyData PBKdf2 -IVData IV -Data K1
 # AESKey = K1 + K2
 
 # Create AES Object
@@ -366,7 +366,7 @@ param (
 [byte[]] $Key = $PBKDF2
 [byte[]] $IV =  @(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
-$AES128Key = Encrypt-AES -KeyData $key -IVData $IV -Data $nFolded
+$AES128Key = Protect-Aes -KeyData $key -IVData $IV -Data $nFolded
 return $(Get-HexStringFromByteArray -Data $AES128Key)
 }
 
@@ -382,8 +382,8 @@ param (
 [byte[]] $Key = $PBKDF2
 [byte[]] $IV =  @(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0)
 
-$k1 = Encrypt-AES -KeyData $key -IVData $IV -Data $nFolded
-$k2 = Encrypt-AES -KeyData $key -IVData $IV -Data $k1
+$k1 = Protect-Aes -KeyData $key -IVData $IV -Data $nFolded
+$k2 = Protect-Aes -KeyData $key -IVData $IV -Data $k1
 
 $AES256Key = $k1 + $k2
 return $(Get-HexStringFromByteArray -Data $AES256Key)
@@ -469,7 +469,7 @@ default{$nameType = @(00,00,00,01);break}
 return $nameType
 }
 
-function Create-KeyTabEntry {
+function New-KeyTabEntry {
 param (
 [Parameter(Mandatory=$true)]$PasswordString,
 [Parameter(Mandatory=$true)]$RealmString,
@@ -659,7 +659,7 @@ $AES256 = $true
 ### Create KeyTab Entries for selected E-Types RC4/AES128/AES256 supported
 $keytabEntry = $null
 if($RC4 -eq $true){
-$keytabEntry = Create-KeyTabEntry `
+$keytabEntry = New-KeyTabEntry `
 -realmString $Realm -Components $PrincipalArray -passwordString $Password `
 -PrincipalType $PType -EncryptionKeyType RC4 -KVNO $KVNO
 $keyTabEntries += $keytabEntry.KeytabEntry
@@ -667,7 +667,7 @@ if($Script:Silent -eq $false){ Write-Host "RC4:"$keytabEntry.KeyBlock -Foregroun
 }
 $keytabEntry = $null
 if($AES128 -eq $true){
-$keytabEntry = Create-KeyTabEntry `
+$keytabEntry = New-KeyTabEntry `
 -realmString $Realm -Components $PrincipalArray -passwordString $Password `
 -PrincipalType $PType -EncryptionKeyType AES128 -KVNO $KVNO -SALT $SALT
 $keyTabEntries += $keytabEntry.KeytabEntry
@@ -675,7 +675,7 @@ if($Script:Silent -eq $false){ Write-Host "AES128:"$keytabEntry.KeyBlock -Foregr
 }
 $keytabEntry = $null
 if($AES256 -eq $true){
-$keytabEntry = Create-KeyTabEntry `
+$keytabEntry = New-KeyTabEntry `
 -realmString $Realm -Components $PrincipalArray -passwordString $Password `
 -PrincipalType $PType -EncryptionKeyType AES256 -KVNO $KVNO -SALT $SALT
 $keyTabEntries += $keytabEntry.KeytabEntry
@@ -716,4 +716,4 @@ $fileBytes += $keyTabEntries
 [System.IO.File]::WriteAllBytes($File,$fileBytes)
 }
 }
-Export-ModuleMember -Function Get-MD4,Get-PBKDF2,Encrypt-AES,Get-AES128Key,Get-AES256Key,Get-HexStringFromByteArray,Get-ByteArrayFromHexString,Get-BytesBigEndian,Get-PrincipalType,Create-KeyTabEntry
+Export-ModuleMember -Function Get-MD4,Get-PBKDF2,Protect-Aes,Get-AES128Key,Get-AES256Key,Get-HexStringFromByteArray,Get-ByteArrayFromHexString,Get-BytesBigEndian,Get-PrincipalType,New-KeyTabEntry

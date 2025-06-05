@@ -6,6 +6,6 @@
     CompanyName = ''
     Copyright = ''
     Description = 'Utility functions for creating offline keytab files.'
-    FunctionsToExport = @('Get-MD4','Get-PBKDF2','Encrypt-AES','Get-AES128Key','Get-AES256Key','Get-HexStringFromByteArray','Get-ByteArrayFromHexString','Get-BytesBigEndian','Get-PrincipalType','Create-KeyTabEntry')
+    FunctionsToExport = @('Get-MD4','Get-PBKDF2','Protect-Aes','Get-AES128Key','Get-AES256Key','Get-HexStringFromByteArray','Get-ByteArrayFromHexString','Get-BytesBigEndian','Get-PrincipalType','New-KeyTabEntry')
     PowerShellVersion = '5.1'
 }
