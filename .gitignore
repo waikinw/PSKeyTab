@@ -15,4 +15,6 @@ obj/
 
 # Test results
 TestResults/
+# Pester output
+tests/Output/
 

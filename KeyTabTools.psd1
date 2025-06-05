@@ -1,6 +1,6 @@
 @{
-    RootModule = 'KeyTabTools.ps1'
-    ModuleVersion = '1.1.0'
+    RootModule = 'KeyTabTools.psm1'
+    ModuleVersion = '1.2.0'
     GUID = '325f7f9a-87be-42ec-ba96-c5e423718284'
     Author = 'TRAB'
     CompanyName = ''
