@@ -630,8 +630,8 @@ $SALT += $($PrincipalArray[$i].Replace('/',""))
 }
 
 }
-### Finish spliting principal into component parts. PrincipalArray should have at most 2 elements. Testing with Java based tools, 
-### the keytab entry can only support one UPN. The components portion of the keytab entry appears to only be for spliting
+### Finish splitting principal into component parts. PrincipalArray should have at most 2 elements. Testing with Java-based tools,
+### the keytab entry can only support one UPN. The components portion of the keytab entry appears to only be for splitting
 ### a UPN in an SPN format. e.g. HOST/user@dev.home
 $PrincipalText = $Principal
 $Principal = $Principal.Replace('/',",")
