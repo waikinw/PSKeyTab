@@ -311,6 +311,8 @@ param (
 [Parameter(Mandatory=$true)]$Data
 )
 
+### All arguments should be supplied as byte arrays
+
 ### AES 128-CTS
 # KeySize = 16
 # AESKey = Encrypt-AES -KeyData PBKdf2 -IVData IV -Data NFoldText
@@ -333,7 +335,7 @@ param (
     $Aes.Padding = [System.Security.Cryptography.PaddingMode]::None
     $Aes.BlockSize = 128
 
-    $encryptor = $Aes.CreateEncryptor($key,$IV)
+    $encryptor = $Aes.CreateEncryptor($KeyData,$IVData)
     $memStream = new-Object IO.MemoryStream
 
     [byte[]] $AESKey = @()
