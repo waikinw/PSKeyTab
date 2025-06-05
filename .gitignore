@@ -1,0 +1,18 @@
+# Build artifacts
+bin/
+obj/
+*.nupkg
+*.zip
+
+# Logs and transient files
+*.log
+*.tmp
+*.cache
+
+# IDE settings
+.vscode/
+.idea/
+
+# Test results
+TestResults/
+

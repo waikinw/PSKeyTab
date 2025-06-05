@@ -28,11 +28,11 @@
 <h3 id="Examples">Examples</h3>
 
 <h4 id="Example01">Create a KeyTab file with parameters.</h4>
-<p><i>PS D:\Temp> .\Create-KeyTab.ps1 -AES128 -AES256 -Realm DEV.HOME -Principal http/AppService</i></p>
+<p><i>PS D:\Temp> .\KeyTabTools.ps1 -AES128 -AES256 -Realm DEV.HOME -Principal http/AppService</i></p>
 <img src="images/CreateKeytab01.png" id="Image1" alt="">
 
 <h4 id="Example02">Create a KeyTab without parameters.</h4>
-<p><i>PS D:\Temp> .\Create-KeyTab.ps1</i></p>
+<p><i>PS D:\Temp> .\KeyTabTools.ps1</i></p>
 Deafult encryption is AES-256.
 <img src="images/CreateKeytab02.png" id="Image1" alt="">
 

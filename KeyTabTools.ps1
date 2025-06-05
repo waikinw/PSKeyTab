@@ -1,5 +1,5 @@
 <#PSScriptInfo
-.VERSION 1.0.2
+.VERSION 1.1.0
 .GUID 325f7f9a-87be-42ec-ba96-c5e423718284
 .AUTHOR TRAB
 .COMPANYNAME
@@ -21,7 +21,7 @@
 #> 
 ##########################################################
 ###
-###      Create-KeyTab.ps1
+###      KeyTabTools.ps1
 ###
 ###      Created : 2019-10-26
 ###      Modified: 2020-10-26
@@ -81,15 +81,15 @@ Optional Parameters
 -NoPrompt  : Suppress Write KeyTab File Prompt
 
 .EXAMPLE
-.\Create-KeyTab.ps1
+.\KeyTabTools.ps1
 .EXAMPLE
-.\Create-KeyTab.ps1 -AES256 -AES128 -RC4
+.\KeyTabTools.ps1 -AES256 -AES128 -RC4
 .EXAMPLE
-.\Create-KeyTab.ps1 -AES256 -AES128 -Append
+.\KeyTabTools.ps1 -AES256 -AES128 -Append
 .EXAMPLE
-.\Create-KeyTab.ps1 -AES256 -AES128 -SALT "MY.REALM.COMprincipalname"
+.\KeyTabTools.ps1 -AES256 -AES128 -SALT "MY.REALM.COMprincipalname"
 .EXAMPLE
-.\Create-KeyTab.ps1 -Realm "MY.REALM.COM" -Principal "principalname" -Password "Secret" -File "c:\temp\login.keytab"
+.\KeyTabTools.ps1 -Realm "MY.REALM.COM" -Principal "principalname" -Password "Secret" -File "c:\temp\login.keytab"
 
 .NOTES
 Use -QUIET and -NOPROMPT for batch mode processing.
@@ -97,6 +97,7 @@ Use -QUIET and -NOPROMPT for batch mode processing.
 .LINK
 https://www.linkedin.com/in/adamburford
 #>
+if ($MyInvocation.InvocationName -ne ".") {
 param (
 [Parameter(Mandatory=$true,HelpMessage="REALM name will be forced to Upper Case")]$Realm,
 [Parameter(Mandatory=$true,HelpMessage="Principal is case sensative. It must match the principal portion of the UPN",ValueFromPipelineByPropertyName=$true)]$Principal,
@@ -112,6 +113,7 @@ param (
 [Parameter(Mandatory=$false)][Switch]$Quiet,
 [Parameter(Mandatory=$false)][Switch]$NoPrompt
 )
+}
 
 function Get-MD4{
     PARAM(
@@ -606,6 +608,7 @@ return $password
 }
 
 
+if ($MyInvocation.InvocationName -ne ".") {
 if ([string]::IsNullOrEmpty($Password)){$Password = $(Get-Password)}
 
 if ([string]::IsNullOrEmpty($File)){$File=$(Get-Location).Path+'\login.keytab'}
@@ -709,3 +712,5 @@ $fileBytes += $keyTabVersion
 $fileBytes += $keyTabEntries
 [System.IO.File]::WriteAllBytes($File,$fileBytes)
 }
+}
+Export-ModuleMember -Function Get-MD4,Get-PBKDF2,Encrypt-AES,Get-AES128Key,Get-AES256Key,Get-HexStringFromByteArray,Get-ByteArrayFromHexString,Get-BytesBigEndian,Get-PrincipalType,Create-KeyTabEntry

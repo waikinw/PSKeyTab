@@ -1,17 +1,33 @@
-<html>
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<!--
-  The above 2 meta tags *must* come first in the <head>
-  to consistently ensure proper document rendering.
-  Any other head element should come *after* these tags.
- -->
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-</head>
-<body>
-  <p><b>Create A KeyTab File Using PowerShell Script</b></p>
-  <p>Follow this link for documentation.</p>
-<a href="https://therealadamburford.github.io/Create-KeyTab/">https://therealadamburford.github.io/Create-KeyTab/</a> 
-</body>
-</html>
+# KeyTabTools
+
+KeyTabTools is a PowerShell utility for generating offline keytab files for Active Directory accounts. It can be used on any system with PowerShell and does not require direct domain access.
+
+## Requirements
+
+- PowerShell 5.1 or later
+- Knowledge of the account password and UPN or service principal name
+
+## Installation
+
+Clone this repository and import the module:
+
+```powershell
+Import-Module ./KeyTabTools.psd1
+```
+
+Alternatively, you can run the script directly:
+
+```powershell
+./KeyTabTools.ps1 -Realm DEV.HOME -Principal http/AppService -AES256
+```
+
+## Usage
+
+When imported as a module, the helper functions become available. To generate a keytab via the script, run it with the desired parameters. Default encryption is AES256.
+
+```powershell
+./KeyTabTools.ps1 -Realm DEV.HOME -Principal user@dev.home -File .\login.keytab
+```
+
+See the [documentation site](https://therealadamburford.github.io/Create-KeyTab/) for detailed examples and parameter explanations.
+
