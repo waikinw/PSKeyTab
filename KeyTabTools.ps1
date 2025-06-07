@@ -113,11 +113,20 @@ param (
     [switch]$NoPrompt
 )
 
-function Get-MD4{
-    PARAM(
-        [String]$String,
-        [Byte[]]$bArray,
-        [Switch]$UpperCase
+function Get-MD4 {
+    <#
+    .SYNOPSIS
+        Calculates an MD4 hash.
+
+    .DESCRIPTION
+        Returns the MD4 hash of a string or byte array.  Optionally the
+        result can be returned in upper case.
+    #>
+
+    param(
+        [string]$String,
+        [byte[]]$ByteArray,
+        [switch]$UpperCase
     )
     
     # Author: Larry.Song@outlook.com
@@ -129,9 +138,9 @@ function Get-MD4{
     {
         $Array = [byte[]]@($String.ToCharArray() | %{[int]$_})
     }
-    if($bArray)
+    if($ByteArray)
     {
-        $Array = $bArray
+        $Array = $ByteArray
     }
     # padding 100000*** to length 448, last (64 bits / 8) 8 bytes fill with original length
     # at least one (512 bits / 8) 64 bytes array
@@ -271,11 +280,28 @@ public class Shift
 }
 
 function Get-PBKDF2 {
-param (
-[Parameter(Mandatory=$true)]$PasswordString,
-[Parameter(Mandatory=$true)]$SALT,
-[Parameter(Mandatory=$true)][ValidateSet("16", "32")][String[]]$KeySize
-)
+    <#
+    .SYNOPSIS
+        Derives bytes using PBKDF2.
+
+    .PARAMETER PasswordString
+        The source password.
+
+    .PARAMETER SALT
+        The salt value for the key derivation.
+
+    .PARAMETER KeySize
+        Size of the key in bytes (16 or 32).
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$PasswordString,
+        [Parameter(Mandatory=$true)]
+        [string]$SALT,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('16','32')][string]$KeySize
+    )
 
 ### Set Key Size
 switch($KeySize){
@@ -305,11 +331,32 @@ return $deriveBytes.GetBytes($size)
 }
 
 function Protect-Aes {
-param (
-[Parameter(Mandatory=$true)]$KeyData,
-[Parameter(Mandatory=$true)]$IVData,
-[Parameter(Mandatory=$true)]$Data
-)
+    <#
+    .SYNOPSIS
+        Encrypts data using AES CBC mode with no padding.
+
+    .DESCRIPTION
+        Helper used to create keys for AES based encryption types. All
+        parameters should be supplied as byte arrays.
+
+    .PARAMETER KeyData
+        The AES key material.
+
+    .PARAMETER IVData
+        Initialization vector for the encryption.
+
+    .PARAMETER Data
+        Data to encrypt.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [byte[]]$KeyData,
+        [Parameter(Mandatory=$true)]
+        [byte[]]$IVData,
+        [Parameter(Mandatory=$true)]
+        [byte[]]$Data
+    )
 
 ### All arguments should be supplied as byte arrays
 
@@ -352,10 +399,23 @@ param (
 }
 
 function Get-AES128Key {
-param (
-[Parameter(Mandatory=$true)]$PasswordString,
-[Parameter(Mandatory=$true)]$SALT=""
-)
+    <#
+    .SYNOPSIS
+        Generates an AES-128 key.
+
+    .PARAMETER PasswordString
+        Source password used for key derivation.
+
+    .PARAMETER SALT
+        Kerberos salt value.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$PasswordString,
+        [Parameter(Mandatory=$true)]
+        [string]$SALT = ""
+    )
 
 [byte[]] $PBKDF2 = Get-PBKDF2 -PasswordString $passwordString -SALT $SALT -KeySize 16
 #[byte[]] $nFolded = (Get-NFold-Bytes -Data ([Text.Encoding]::ASCII.GetBytes("kerberos")) -KeySize 16)
@@ -368,10 +428,23 @@ return $(Get-HexStringFromByteArray -Data $AES128Key)
 }
 
 function Get-AES256Key {
-param (
-[Parameter(Mandatory=$true)]$PasswordString,
-[Parameter(Mandatory=$true)]$SALT=""
-)
+    <#
+    .SYNOPSIS
+        Generates an AES-256 key.
+
+    .PARAMETER PasswordString
+        Source password used for key derivation.
+
+    .PARAMETER SALT
+        Kerberos salt value.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$PasswordString,
+        [Parameter(Mandatory=$true)]
+        [string]$SALT = ""
+    )
 
 [byte[]] $PBKDF2 = Get-PBKDF2 -PasswordString $passwordString -SALT $SALT -KeySize 32
 #[byte[]] $nFolded = (Get-NFold-Bytes -Data ([Text.Encoding]::ASCII.GetBytes("kerberos")) -KeySize 16)
@@ -386,10 +459,19 @@ $AES256Key = $k1 + $k2
 return $(Get-HexStringFromByteArray -Data $AES256Key)
 }
 
-function Get-HexStringFromByteArray{
-param (
-[Parameter(Mandatory=$true,Position=0)][byte[]]$Data
-)
+function Get-HexStringFromByteArray {
+    <#
+    .SYNOPSIS
+        Converts a byte array into an uppercase hexadecimal string.
+
+    .PARAMETER Data
+        Byte array to convert.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [byte[]]$Data
+    )
 $hexString = $null
 
         $sb = New-Object System.Text.StringBuilder ($Data.Length * 2)
@@ -402,11 +484,19 @@ $hexString = $null
 return $hexString
 }
 
-function Get-ByteArrayFromHexString{
-param 
-(
-[Parameter(Mandatory=$true)][String]$HexString
-)
+function Get-ByteArrayFromHexString {
+    <#
+    .SYNOPSIS
+        Converts a hexadecimal string into a byte array.
+
+    .PARAMETER HexString
+        String containing hexadecimal characters.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$HexString
+    )
         $i = 0;
         $bytes = @()
         while($i -lt $HexString.Length)
@@ -420,10 +510,23 @@ return $bytes
 }
 
 function Get-BytesBigEndian {
-param (
-[Parameter(Mandatory=$true)]$Value,
-[Parameter(Mandatory=$true)][ValidateSet("16", "32")][String[]]$BitSize
-)
+    <#
+    .SYNOPSIS
+        Returns a big endian byte representation of an integer.
+
+    .PARAMETER Value
+        Integer value to convert.
+
+    .PARAMETER BitSize
+        Length of the resulting byte array in bits (16 or 32).
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [int]$Value,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('16','32')][string]$BitSize
+    )
 
 ### Set Key Type
 [byte[]] $bytes = @()
@@ -449,9 +552,19 @@ return $bytes
 }
 
 function Get-PrincipalType {
-param (
-[Parameter(Mandatory=$true)][ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PrincipalType
-)
+    <#
+    .SYNOPSIS
+        Returns the numerical value for a Kerberos principal type.
+
+    .PARAMETER PrincipalType
+        String representation of the principal type.
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('KRB5_NT_PRINCIPAL','KRB5_NT_SRV_INST','KRB5_NT_SRV_HST','KRB5_NT_UID')]
+        [string[]]$PrincipalType
+    )
 
 [byte[]] $nameType = @()
 
@@ -467,15 +580,54 @@ return $nameType
 }
 
 function New-KeyTabEntry {
-param (
-[Parameter(Mandatory=$true)]$PasswordString,
-[Parameter(Mandatory=$true)]$RealmString,
-[Parameter(Mandatory=$true)]$Components,
-[Parameter(Mandatory=$false)]$SALT="",
-[Parameter(Mandatory=$false)]$KVNO=1,
-[Parameter(Mandatory=$true)][ValidateSet("KRB5_NT_PRINCIPAL", "KRB5_NT_SRV_INST", "KRB5_NT_SRV_HST", "KRB5_NT_UID")][String[]]$PrincipalType,
-[Parameter(Mandatory=$true)][ValidateSet("RC4", "AES128", "AES256")][String[]]$EncryptionKeyType
-)
+    <#
+    .SYNOPSIS
+        Creates a keytab entry object.
+
+    .DESCRIPTION
+        Builds the byte sequence for a single keytab entry using the
+        supplied credentials and encryption type.
+
+    .PARAMETER PasswordString
+        Account password.
+
+    .PARAMETER RealmString
+        Kerberos realm for the entry.
+
+    .PARAMETER Components
+        Array of principal components.
+
+    .PARAMETER SALT
+        Optional Kerberos salt to use.
+
+    .PARAMETER KVNO
+        Key version number.
+
+    .PARAMETER PrincipalType
+        Kerberos principal type for the entry.
+
+    .PARAMETER EncryptionKeyType
+        Desired encryption type (RC4, AES128 or AES256).
+    #>
+
+    param(
+        [Parameter(Mandatory=$true)]
+        [string]$PasswordString,
+        [Parameter(Mandatory=$true)]
+        [string]$RealmString,
+        [Parameter(Mandatory=$true)]
+        $Components,
+        [Parameter(Mandatory=$false)]
+        [string]$SALT = "",
+        [Parameter(Mandatory=$false)]
+        [int]$KVNO = 1,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('KRB5_NT_PRINCIPAL','KRB5_NT_SRV_INST','KRB5_NT_SRV_HST','KRB5_NT_UID')]
+        [string[]]$PrincipalType,
+        [Parameter(Mandatory=$true)]
+        [ValidateSet('RC4','AES128','AES256')]
+        [string[]]$EncryptionKeyType
+    )
 
 ### Key Types: RC4 0x17 (23), AES128  0x11 (17), AES256  0x12 (18)
 
@@ -490,7 +642,7 @@ switch($EncryptionKeyType){
        $sizeKeyBlock = @(00,16)
        ### Create RC4-HMAC Key. Unicode is required for MD4 hash input.
        [byte[]]$password = [Text.Encoding]::Unicode.GetBytes($passwordString)
-       $keyBlock = Get-MD4 -bArray $password -UpperCase
+       $keyBlock = Get-MD4 -ByteArray $password -UpperCase
        break
        }
 "AES128"{
@@ -598,17 +750,30 @@ return $keytabEntryObject
 }
 
 Function Get-Password {
+    <#
+    .SYNOPSIS
+        Prompts for a password without echoing input.
+    #>
 
-        $passwordSecure = Read-Host -Prompt "Enter Password" -AsSecureString
-        $passwordBSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($passwordSecure)
-        $password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($passwordBSTR)
+    $passwordSecure = Read-Host -Prompt "Enter Password" -AsSecureString
+    $passwordBSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($passwordSecure)
+    $password = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($passwordBSTR)
 
-
-return $password
+    return $password
 }
 
 
 function Invoke-KeyTabTools {
+    <#
+    .SYNOPSIS
+        Generates one or more keytab entries and writes them to disk.
+
+    .DESCRIPTION
+        Wrapper function that accepts parameters typically used with ktpass
+        to create offline keytab files. When called as a script, the
+        parameters are passed directly from the command line.
+    #>
+
     [CmdletBinding()]
     param(
         [Parameter(Mandatory=$true,HelpMessage="REALM name will be forced to Upper Case")]$Realm,
