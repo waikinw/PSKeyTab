@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.3.1] - 2024-11-14
 
 ### Added
 - **NEW FEATURE**: `Get-KeyTabEntries` function to parse and list entries from existing keytab files
@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated README.md with `Get-KeyTabEntries` usage examples
 - Added detailed documentation for parsing keytab files
 - Updated exported functions list in module documentation
+
+### Fixed
+- Test reliability: Explicitly set KVNO values in tests to ensure consistent behavior
 
 ## [1.3.0] - 2024-11-14
 

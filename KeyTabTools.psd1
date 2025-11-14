@@ -1,6 +1,6 @@
 @{
     RootModule = 'KeyTabTools.psm1'
-    ModuleVersion = '1.3.0'
+    ModuleVersion = '1.3.1'
     GUID = '325f7f9a-87be-42ec-ba96-c5e423718284'
     Author = 'waikinw'
     CompanyName = ''
