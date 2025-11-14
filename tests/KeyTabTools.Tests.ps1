@@ -459,6 +459,7 @@ Describe 'Get-KeyTabEntries' {
             -Password 'TestPassword123' `
             -File $testFile `
             -AES256 `
+            -KVNO 1 `
             -NoPrompt `
             -Quiet
 
