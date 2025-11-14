@@ -51,8 +51,19 @@ jobs:
 
           Write-Host "Publishing module to PowerShell Gallery..." -ForegroundColor Cyan
 
-          # Publish using the manifest file path
-          Publish-Module -Path ./KeyTabTools.psd1 -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+          # Create module directory structure that Publish-Module expects
+          $moduleName = "KeyTabTools"
+          $moduleDir = "./$moduleName"
+
+          New-Item -ItemType Directory -Path $moduleDir -Force | Out-Null
+          Copy-Item -Path "KeyTabTools.psd1" -Destination $moduleDir
+          Copy-Item -Path "KeyTabTools.psm1" -Destination $moduleDir
+          Copy-Item -Path "KeyTabTools.ps1" -Destination $moduleDir
+          Copy-Item -Path "LICENSE" -Destination $moduleDir
+          Copy-Item -Path "README.md" -Destination $moduleDir
+
+          # Publish the module
+          Publish-Module -Path $moduleDir -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
 
           Write-Host "Module published successfully!" -ForegroundColor Green
 
