@@ -227,6 +227,37 @@ $entry = New-KeyTabEntry `
 Write-Host "Key Block: $($entry.KeyBlock)"
 ```
 
+### Example 8: Listing Keytab Entries
+
+```powershell
+# Import the module
+Import-Module ./KeyTabTools.psd1
+
+# List entries from an existing keytab file
+$entries = Get-KeyTabEntries -FilePath './user.keytab'
+
+# Display entries in a table
+$entries | Format-Table -Property Principal, EncryptionType, KVNO, Timestamp
+
+# Get detailed information about each entry
+$entries | ForEach-Object {
+    Write-Host "Principal: $($_.Principal)"
+    Write-Host "  Realm: $($_.Realm)"
+    Write-Host "  Encryption: $($_.EncryptionType)"
+    Write-Host "  KVNO: $($_.KVNO)"
+    Write-Host "  Timestamp: $($_.Timestamp)"
+    Write-Host "  Key Length: $($_.KeyLength) bytes"
+    Write-Host ""
+}
+
+# Filter entries by encryption type
+$aes256Entries = $entries | Where-Object { $_.EncryptionType -eq 'AES256-CTS-HMAC-SHA1-96' }
+Write-Host "Found $($aes256Entries.Count) AES256 entries"
+
+# Export to CSV for analysis
+$entries | Export-Csv -Path './keytab-analysis.csv' -NoTypeInformation
+```
+
 ## Parameters
 
 ### Required Parameters
@@ -327,6 +358,7 @@ When imported as a module, the following functions are available:
 - `Get-BytesBigEndian` - Convert integers to big-endian bytes
 - `Get-PrincipalType` - Get principal type numeric value
 - `New-KeyTabEntry` - Create a single keytab entry
+- `Get-KeyTabEntries` - Parse and list entries from a keytab file
 
 ## Troubleshooting
 

@@ -22,6 +22,7 @@
         'Get-BytesBigEndian',
         'Get-PrincipalType',
         'New-KeyTabEntry',
+        'Get-KeyTabEntries',
         'Invoke-KeyTabTools'
     )
 
