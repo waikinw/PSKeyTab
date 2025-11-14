@@ -60,7 +60,8 @@ jobs:
           Copy-Item -Path "KeyTabTools.psm1" -Destination $moduleDir
           Copy-Item -Path "KeyTabTools.ps1" -Destination $moduleDir
           Copy-Item -Path "LICENSE" -Destination $moduleDir
-          Copy-Item -Path "README.md" -Destination $moduleDir
+          # Use condensed README for PowerShell Gallery (under 8000 byte limit)
+          Copy-Item -Path "README_PSGALLERY.md" -Destination "$moduleDir/README.md"
 
           # Publish the module
           Publish-Module -Path $moduleDir -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
@@ -82,7 +83,8 @@ jobs:
           Copy-Item -Path KeyTabTools.psm1 -Destination $packageName
           Copy-Item -Path KeyTabTools.ps1 -Destination $packageName
           Copy-Item -Path LICENSE -Destination $packageName
-          Copy-Item -Path README.md -Destination $packageName
+          # Use condensed README for distribution (under 8000 byte limit)
+          Copy-Item -Path README_PSGALLERY.md -Destination "$packageName/README.md"
           Copy-Item -Path CHANGELOG.md -Destination $packageName
 
           # Create ZIP archive
