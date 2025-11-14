@@ -1,0 +1,85 @@
+name: Publish to PowerShell Gallery
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (leave empty to use manifest version)'
+        required: false
+        type: string
+
+jobs:
+  publish:
+    name: Publish Module
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Validate Module Manifest
+        shell: pwsh
+        run: |
+          $manifest = Test-ModuleManifest -Path ./KeyTabTools.psd1 -ErrorAction Stop
+          Write-Host "Module: $($manifest.Name)"
+          Write-Host "Version: $($manifest.Version)"
+          Write-Host "Author: $($manifest.Author)"
+          Write-Host "Description: $($manifest.Description)"
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run Tests
+        shell: pwsh
+        run: |
+          $result = Invoke-Pester -PassThru
+          if ($result.FailedCount -gt 0) {
+            throw "Tests failed. Cannot publish."
+          }
+          Write-Host "All tests passed!" -ForegroundColor Green
+
+      - name: Publish to PowerShell Gallery
+        shell: pwsh
+        env:
+          PSGALLERY_API_KEY: ${{ secrets.PSGALLERY_API_KEY }}
+        run: |
+          if (-not $env:PSGALLERY_API_KEY) {
+            throw "PSGALLERY_API_KEY secret is not set. Please add it in repository settings."
+          }
+
+          Write-Host "Publishing module to PowerShell Gallery..." -ForegroundColor Cyan
+
+          Publish-Module -Path . -NuGetApiKey $env:PSGALLERY_API_KEY -Verbose
+
+          Write-Host "Module published successfully!" -ForegroundColor Green
+
+      - name: Create Module Package
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile -Path ./KeyTabTools.psd1
+          $version = $manifest.ModuleVersion
+          $packageName = "KeyTabTools-$version"
+
+          # Create package directory
+          New-Item -ItemType Directory -Path $packageName -Force | Out-Null
+
+          # Copy module files
+          Copy-Item -Path KeyTabTools.psd1 -Destination $packageName
+          Copy-Item -Path KeyTabTools.psm1 -Destination $packageName
+          Copy-Item -Path KeyTabTools.ps1 -Destination $packageName
+          Copy-Item -Path LICENSE -Destination $packageName
+          Copy-Item -Path README.md -Destination $packageName
+          Copy-Item -Path CHANGELOG.md -Destination $packageName
+
+          # Create ZIP archive
+          Compress-Archive -Path $packageName -DestinationPath "$packageName.zip" -Force
+
+          Write-Host "Package created: $packageName.zip" -ForegroundColor Green
+
+      - name: Upload Package Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: module-package
+          path: KeyTabTools-*.zip

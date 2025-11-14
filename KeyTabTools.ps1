@@ -1,33 +1,36 @@
 <#PSScriptInfo
-.VERSION 1.1.0
+.VERSION 1.3.0
 .GUID 325f7f9a-87be-42ec-ba96-c5e423718284
-.AUTHOR TRAB
+.AUTHOR waikinw
 .COMPANYNAME
-.COPYRIGHT
-.TAGS KeyTab Ktpass Key Tab
+.COPYRIGHT (c) 2020 Adam Burford, (c) 2024 waikinw
+.TAGS KeyTab Ktpass Key Tab Kerberos ActiveDirectory AES RC4 Cross-Platform
 .LICENSEURI https://github.com/waikinw/PSKeyTab/blob/main/LICENSE
 .PROJECTURI https://github.com/waikinw/PSKeyTab
 .ICONURI
-.EXTERNALMODULEDEPENDENCIES 
+.EXTERNALMODULEDEPENDENCIES
 .REQUIREDSCRIPTS
 .EXTERNALSCRIPTDEPENDENCIES
-.RELEASENOTES
+.RELEASENOTES https://github.com/waikinw/PSKeyTab/blob/main/CHANGELOG.md
 .PRIVATEDATA
 #>
 
-<# 
-.DESCRIPTION 
- This script will generate off-line keytab files for use with Active Directory (AD). While the script is designed to work independently of AD, this script can be used with a wrapper script that uses Get-ADUser or Get-ADObject to retrieve the UPN of a samaccountname or a list of samaccountnames for use in batch processing of KeyTab creation. More information at https://therealadamburford.github.io/Create-KeyTab/ 
-#> 
+<#
+.DESCRIPTION
+ This script will generate off-line keytab files for use with Active Directory (AD). While the script is designed to work independently of AD, this script can be used with a wrapper script that uses Get-ADUser or Get-ADObject to retrieve the UPN of a samaccountname or a list of samaccountnames for use in batch processing of KeyTab creation.
+
+ Original work by Adam Burford (TRAB): https://github.com/TheRealAdamBurford/Create-KeyTab
+ Current repository: https://github.com/waikinw/PSKeyTab
+#>
 ##########################################################
 ###
 ###      KeyTabTools.ps1
 ###
-###      Created : 2019-10-26
-###      Modified: 2020-10-26
+###      Originally Created: 2019-10-26 by Adam Burford
+###      Enhanced: 2024-11-14 by waikinw
 ###
-###      Created By : Adam Burford
-###      Modified By: Adam Burford
+###      Original Author: Adam Burford (TRAB)
+###      Current Maintainer: waikinw
 ###
 ###
 ### Notes: Create RC4-HMAC, AES128. AES256 KeyTab file. Does not use AD. 
