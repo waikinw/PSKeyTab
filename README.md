@@ -453,12 +453,33 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to submit i
 
 ## License
 
-See [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Authors
+## Authors and Attribution
 
-- Original Author: TRAB
-- Contributors: See GitHub contributors
+**Current Maintainer:**
+- [waikinw](https://github.com/waikinw) - Current maintainer and primary contributor
+
+**Original Author:**
+- [Adam Burford (TRAB)](https://github.com/TheRealAdamBurford) - Original author and creator
+- LinkedIn: https://www.linkedin.com/in/adamburford
+- Original repository: https://github.com/TheRealAdamBurford/Create-KeyTab
+
+**Credits:**
+- MD4 implementation by Larry.Song@outlook.com
+- Various cryptographic algorithm references (see source code comments)
+
+This project builds upon Adam Burford's excellent foundation with significant enhancements including:
+- Comprehensive test coverage (60+ tests)
+- PowerShell Gallery publication support
+- Enhanced documentation and examples
+- CI/CD automation
+- Module structure improvements
+- Cross-platform verification
+
+## Contributors
+
+See [GitHub contributors](https://github.com/waikinw/PSKeyTab/graphs/contributors) for a complete list of contributors.
 
 ## Changelog
 

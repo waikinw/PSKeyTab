@@ -1,6 +1,7 @@
 MIT License
 
-Copyright (c) 2020 TheRealAdamBurford
+Copyright (c) 2020 Adam Burford (TheRealAdamBurford)
+Copyright (c) 2024 waikinw
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,3 +20,16 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+ATTRIBUTION
+
+This project is based on the original work by Adam Burford (TRAB):
+- Original repository: https://github.com/TheRealAdamBurford/Create-KeyTab
+- Original author: Adam Burford
+- LinkedIn: https://www.linkedin.com/in/adamburford
+
+The current maintainer (waikinw) has significantly enhanced and extended
+the original codebase with comprehensive testing, documentation, and
+PowerShell Gallery publication support.

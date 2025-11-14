@@ -2,10 +2,10 @@
     RootModule = 'KeyTabTools.psm1'
     ModuleVersion = '1.3.0'
     GUID = '325f7f9a-87be-42ec-ba96-c5e423718284'
-    Author = 'TRAB'
+    Author = 'waikinw'
     CompanyName = ''
-    Copyright = '(c) 2024 TRAB. All rights reserved.'
-    Description = 'Cross-platform PowerShell utility for generating offline Kerberos keytab files. Supports RC4-HMAC, AES-128, and AES-256 encryption. Works on Windows, Linux, and macOS as an alternative to ktpass.'
+    Copyright = '(c) 2020 Adam Burford, (c) 2024 waikinw. All rights reserved.'
+    Description = 'Cross-platform PowerShell utility for generating offline Kerberos keytab files. Supports RC4-HMAC, AES-128, and AES-256 encryption. Works on Windows, Linux, and macOS as an alternative to ktpass. Based on original work by Adam Burford.'
 
     # Minimum PowerShell version
     PowerShellVersion = '5.1'
