@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+- **NEW FEATURE**: `Get-KeyTabEntries` function to parse and list entries from existing keytab files
+  - Read and analyze keytab file contents
+  - Display principal names, encryption types, KVNOs, and timestamps
+  - Support for all encryption types (RC4-HMAC, AES128, AES256)
+  - Export capabilities for analysis (CSV, filtering, etc.)
+  - Comprehensive error handling for corrupt or invalid files
+- Added 9 new comprehensive tests for `Get-KeyTabEntries` function
+- Added example usage in README.md (Example 8: Listing Keytab Entries)
+
+### Documentation
+- Updated README.md with `Get-KeyTabEntries` usage examples
+- Added detailed documentation for parsing keytab files
+- Updated exported functions list in module documentation
+
 ## [1.3.0] - 2024-11-14
 
 ### Fixed

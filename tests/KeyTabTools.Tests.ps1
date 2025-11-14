@@ -19,6 +19,7 @@ Describe 'Module Import' {
             'Get-BytesBigEndian',
             'Get-PrincipalType',
             'New-KeyTabEntry',
+            'Get-KeyTabEntries',
             'Invoke-KeyTabTools'
         )
 
@@ -431,5 +432,197 @@ Describe 'Invoke-KeyTabTools Integration Tests' {
             -Quiet
 
         Test-Path $testFile | Should -Be $true
+    }
+}
+
+Describe 'Get-KeyTabEntries' {
+    BeforeAll {
+        $testFile = Join-Path $TestDrive 'test.keytab'
+    }
+
+    AfterEach {
+        if (Test-Path $testFile) {
+            Remove-Item $testFile -Force
+        }
+    }
+
+    It 'fails gracefully when file does not exist' {
+        $result = Get-KeyTabEntries -FilePath 'nonexistent.keytab' -ErrorAction SilentlyContinue
+        $result | Should -BeNullOrEmpty
+    }
+
+    It 'parses keytab file with single AES256 entry' {
+        # Create a keytab file
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -AES256 `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries.Count | Should -Be 1
+        $entries[0].Principal | Should -Be 'testuser@EXAMPLE.COM'
+        $entries[0].Realm | Should -Be 'EXAMPLE.COM'
+        $entries[0].EncryptionType | Should -Be 'AES256-CTS-HMAC-SHA1-96'
+        $entries[0].KVNO | Should -Be 1
+    }
+
+    It 'parses keytab file with multiple encryption types' {
+        # Create a keytab file with RC4, AES128, and AES256
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -RC4 `
+            -AES128 `
+            -AES256 `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries.Count | Should -Be 3
+
+        # Verify all three encryption types are present
+        $encTypes = $entries | Select-Object -ExpandProperty EncryptionType
+        $encTypes | Should -Contain 'RC4-HMAC'
+        $encTypes | Should -Contain 'AES128-CTS-HMAC-SHA1-96'
+        $encTypes | Should -Contain 'AES256-CTS-HMAC-SHA1-96'
+    }
+
+    It 'parses keytab file with multiple principals' {
+        # Create first entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'user1' `
+            -Password 'Password1' `
+            -File $testFile `
+            -NoPrompt `
+            -Quiet
+
+        # Append second entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'user2' `
+            -Password 'Password2' `
+            -File $testFile `
+            -Append `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries.Count | Should -Be 2
+
+        # Verify principals
+        $principals = $entries | Select-Object -ExpandProperty Principal
+        $principals | Should -Contain 'user1@EXAMPLE.COM'
+        $principals | Should -Contain 'user2@EXAMPLE.COM'
+    }
+
+    It 'parses service principal format correctly' {
+        # Create service principal entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'http/server.example.com' `
+            -Password 'ServicePassword' `
+            -File $testFile `
+            -PType 'KRB5_NT_SRV_HST' `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries.Count | Should -Be 1
+        $entries[0].Principal | Should -Be 'http/server.example.com@EXAMPLE.COM'
+        $entries[0].Components.Count | Should -Be 2
+        $entries[0].Components[0] | Should -Be 'http'
+        $entries[0].Components[1] | Should -Be 'server.example.com'
+        $entries[0].PrincipalType | Should -Be 'KRB5_NT_SRV_HST'
+    }
+
+    It 'preserves custom KVNO values' {
+        # Create entry with custom KVNO
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -KVNO 42 `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries[0].KVNO | Should -Be 42
+    }
+
+    It 'returns key hash for each entry' {
+        # Create entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -AES256 `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries[0].KeyHash | Should -Not -BeNullOrEmpty
+        # AES256 key should be 64 hex characters (32 bytes)
+        $entries[0].KeyHash.Length | Should -Be 64
+        $entries[0].KeyLength | Should -Be 32
+    }
+
+    It 'handles RC4 key length correctly' {
+        # Create RC4 entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -RC4 `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        # RC4 key should be 32 hex characters (16 bytes)
+        $entries[0].KeyHash.Length | Should -Be 32
+        $entries[0].KeyLength | Should -Be 16
+    }
+
+    It 'parses timestamp correctly' {
+        # Create entry
+        Invoke-KeyTabTools `
+            -Realm 'EXAMPLE.COM' `
+            -Principal 'testuser' `
+            -Password 'TestPassword123' `
+            -File $testFile `
+            -NoPrompt `
+            -Quiet
+
+        # Parse it
+        $entries = Get-KeyTabEntries -FilePath $testFile
+        $entries | Should -Not -BeNullOrEmpty
+        $entries[0].Timestamp | Should -Not -BeNullOrEmpty
+        $entries[0].Timestamp | Should -BeOfType [DateTime]
+        # Timestamp should be recent (within last hour)
+        $timeDiff = (Get-Date).ToUniversalTime() - $entries[0].Timestamp
+        $timeDiff.TotalHours | Should -BeLessThan 1
     }
 }

@@ -766,6 +766,224 @@ Function Get-Password {
     return $password
 }
 
+function Get-KeyTabEntries {
+    <#
+    .SYNOPSIS
+        Parses and lists entries from a keytab file.
+
+    .DESCRIPTION
+        Reads a keytab file and displays its contents, including principals,
+        encryption types, KVNOs, and timestamps for each entry.
+
+    .PARAMETER FilePath
+        Path to the keytab file to read.
+
+    .EXAMPLE
+        Get-KeyTabEntries -FilePath "login.keytab"
+
+    .EXAMPLE
+        Get-KeyTabEntries -FilePath "C:\temp\service.keytab" | Format-Table
+
+    .NOTES
+        Returns an array of custom objects with the following properties:
+        - Principal: Full principal name (components@realm)
+        - Realm: Kerberos realm
+        - Components: Array of principal components
+        - PrincipalType: Name type (KRB5_NT_PRINCIPAL, etc.)
+        - EncryptionType: Encryption type (RC4-HMAC, AES128-CTS, AES256-CTS)
+        - KVNO: Key version number
+        - Timestamp: Entry timestamp
+        - KeyLength: Length of the key in bytes
+    #>
+
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory=$true, Position=0)]
+        [string]$FilePath
+    )
+
+    # Verify file exists
+    if (-not (Test-Path -Path $FilePath)) {
+        Write-Error "Keytab file not found: $FilePath"
+        return
+    }
+
+    # Read the entire file as bytes
+    try {
+        [byte[]]$fileBytes = [System.IO.File]::ReadAllBytes($FilePath)
+    }
+    catch {
+        Write-Error "Failed to read keytab file: $_"
+        return
+    }
+
+    # Verify minimum file size (header is 2 bytes)
+    if ($fileBytes.Length -lt 2) {
+        Write-Error "Invalid keytab file: file too small"
+        return
+    }
+
+    # Parse and verify header (should be 0x05 0x02 for version 502)
+    if ($fileBytes[0] -ne 5 -or $fileBytes[1] -ne 2) {
+        Write-Warning "Unexpected keytab version: $($fileBytes[0]).$($fileBytes[1]) (expected 5.2)"
+    }
+
+    # Helper function to read big-endian integers
+    function Read-BigEndianInt16 {
+        param([byte[]]$bytes, [int]$offset)
+        return ([int16]$bytes[$offset] -shl 8) -bor $bytes[$offset + 1]
+    }
+
+    function Read-BigEndianInt32 {
+        param([byte[]]$bytes, [int]$offset)
+        return ([int32]$bytes[$offset] -shl 24) -bor
+               ([int32]$bytes[$offset + 1] -shl 16) -bor
+               ([int32]$bytes[$offset + 2] -shl 8) -bor
+               $bytes[$offset + 3]
+    }
+
+    # Helper function to convert principal type number to name
+    function Get-PrincipalTypeName {
+        param([int32]$typeValue)
+        switch ($typeValue) {
+            1 { return "KRB5_NT_PRINCIPAL" }
+            2 { return "KRB5_NT_SRV_INST" }
+            3 { return "KRB5_NT_SRV_HST" }
+            5 { return "KRB5_NT_UID" }
+            default { return "UNKNOWN ($typeValue)" }
+        }
+    }
+
+    # Helper function to convert encryption type to name
+    function Get-EncryptionTypeName {
+        param([int16]$keyType)
+        switch ($keyType) {
+            23 { return "RC4-HMAC" }
+            17 { return "AES128-CTS-HMAC-SHA1-96" }
+            18 { return "AES256-CTS-HMAC-SHA1-96" }
+            default { return "UNKNOWN ($keyType)" }
+        }
+    }
+
+    # Parse entries
+    $entries = @()
+    $offset = 2  # Skip header
+
+    while ($offset -lt $fileBytes.Length) {
+        # Check if we have enough bytes for entry size field
+        if ($offset + 4 -gt $fileBytes.Length) {
+            Write-Warning "Incomplete entry at offset $offset (not enough bytes for size field)"
+            break
+        }
+
+        # Read entry size (4 bytes, big-endian)
+        $entrySize = Read-BigEndianInt32 -bytes $fileBytes -offset $offset
+        $offset += 4
+
+        # Verify we have enough bytes for the entire entry
+        if ($offset + $entrySize -gt $fileBytes.Length) {
+            Write-Warning "Incomplete entry at offset $($offset - 4) (size: $entrySize, available: $($fileBytes.Length - $offset))"
+            break
+        }
+
+        $entryStart = $offset
+
+        try {
+            # Read number of components (2 bytes, big-endian)
+            $numComponents = Read-BigEndianInt16 -bytes $fileBytes -offset $offset
+            $offset += 2
+
+            # Read realm length and realm string
+            $realmLength = Read-BigEndianInt16 -bytes $fileBytes -offset $offset
+            $offset += 2
+            $realm = [Text.Encoding]::UTF8.GetString($fileBytes, $offset, $realmLength)
+            $offset += $realmLength
+
+            # Read components
+            $components = @()
+            for ($i = 0; $i -lt $numComponents; $i++) {
+                $componentLength = Read-BigEndianInt16 -bytes $fileBytes -offset $offset
+                $offset += 2
+                $component = [Text.Encoding]::UTF8.GetString($fileBytes, $offset, $componentLength)
+                $components += $component
+                $offset += $componentLength
+            }
+
+            # Read name type (4 bytes, big-endian)
+            $nameTypeValue = Read-BigEndianInt32 -bytes $fileBytes -offset $offset
+            $offset += 4
+            $principalType = Get-PrincipalTypeName -typeValue $nameTypeValue
+
+            # Read timestamp (4 bytes, big-endian)
+            $timestampValue = Read-BigEndianInt32 -bytes $fileBytes -offset $offset
+            $offset += 4
+
+            # Convert Unix timestamp to DateTime (handle epoch time 0 specially)
+            if ($timestampValue -eq 0) {
+                $timestamp = [DateTime]::new(1970, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)
+            }
+            else {
+                $timestamp = ([DateTime]::new(1970, 1, 1, 0, 0, 0, [DateTimeKind]::Utc)).AddSeconds($timestampValue)
+            }
+
+            # Read KVNO (1 byte)
+            $kvno = $fileBytes[$offset]
+            $offset += 1
+
+            # Read key type (2 bytes, big-endian)
+            $keyTypeValue = Read-BigEndianInt16 -bytes $fileBytes -offset $offset
+            $offset += 2
+            $encryptionType = Get-EncryptionTypeName -keyType $keyTypeValue
+
+            # Read key length (2 bytes, big-endian)
+            $keyLength = Read-BigEndianInt16 -bytes $fileBytes -offset $offset
+            $offset += 2
+
+            # Read key data
+            $keyData = $fileBytes[$offset..($offset + $keyLength - 1)]
+            $keyHex = Get-HexStringFromByteArray -Data $keyData
+            $offset += $keyLength
+
+            # Construct principal name
+            $principalName = if ($components.Count -gt 0) {
+                ($components -join '/') + '@' + $realm
+            }
+            else {
+                '@' + $realm
+            }
+
+            # Create entry object
+            $entry = [PSCustomObject]@{
+                Principal      = $principalName
+                Realm          = $realm
+                Components     = $components
+                PrincipalType  = $principalType
+                EncryptionType = $encryptionType
+                KVNO           = $kvno
+                Timestamp      = $timestamp
+                KeyLength      = $keyLength
+                KeyHash        = $keyHex
+            }
+
+            $entries += $entry
+        }
+        catch {
+            Write-Warning "Error parsing entry at offset $entryStart`: $_"
+            # Skip to next potential entry
+            $offset = $entryStart + $entrySize
+            continue
+        }
+
+        # Verify we consumed exactly the expected number of bytes
+        $actualSize = $offset - $entryStart
+        if ($actualSize -ne $entrySize) {
+            Write-Warning "Entry size mismatch at offset $entryStart (expected: $entrySize, actual: $actualSize)"
+        }
+    }
+
+    return $entries
+}
+
 
 function Invoke-KeyTabTools {
     <#
