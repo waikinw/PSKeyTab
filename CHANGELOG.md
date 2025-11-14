@@ -1,6 +1,11 @@
 # Changelog
 
-## 1.3.0 (Unreleased)
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [1.3.0] - 2024-11-14
 
 ### Fixed
 - **CRITICAL**: Added `Invoke-KeyTabTools` to module exports - module can now be properly imported and used
@@ -32,7 +37,13 @@
 - Helper function tests
 - Module import and export validation
 
-## 1.2.0
+### Infrastructure
+- PowerShell Gallery publishing workflow
+- GitHub release automation with artifacts
+- Enhanced module manifest with PSGallery metadata
+- Comprehensive release documentation
+
+## [1.2.0] - 2024-11-13
 - Added PowerShell module wrapper `KeyTabTools.psm1`.
 - Introduced Pester test framework with a basic unit test.
 - Added GitHub Actions workflow for running tests.

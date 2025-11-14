@@ -1,0 +1,92 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    name: Create GitHub Release
+    runs-on: windows-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Get Version
+        id: version
+        shell: pwsh
+        run: |
+          $manifest = Import-PowerShellDataFile -Path ./KeyTabTools.psd1
+          $version = $manifest.ModuleVersion
+          echo "version=$version" >> $env:GITHUB_OUTPUT
+          echo "Module Version: $version"
+
+      - name: Install Pester
+        shell: pwsh
+        run: |
+          Install-Module Pester -Force -Scope CurrentUser -SkipPublisherCheck
+
+      - name: Run Tests
+        shell: pwsh
+        run: |
+          $result = Invoke-Pester -PassThru
+          if ($result.FailedCount -gt 0) {
+            throw "Tests failed. Cannot create release."
+          }
+
+      - name: Build Release Package
+        shell: pwsh
+        run: |
+          $version = "${{ steps.version.outputs.version }}"
+          $packageName = "KeyTabTools-$version"
+
+          # Create package directory
+          New-Item -ItemType Directory -Path $packageName -Force | Out-Null
+
+          # Copy module files
+          Copy-Item -Path KeyTabTools.psd1 -Destination $packageName
+          Copy-Item -Path KeyTabTools.psm1 -Destination $packageName
+          Copy-Item -Path KeyTabTools.ps1 -Destination $packageName
+          Copy-Item -Path Test-Module.ps1 -Destination $packageName
+          Copy-Item -Path LICENSE -Destination $packageName
+          Copy-Item -Path README.md -Destination $packageName
+          Copy-Item -Path CHANGELOG.md -Destination $packageName
+          Copy-Item -Path CONTRIBUTING.md -Destination $packageName
+
+          # Create ZIP archive
+          Compress-Archive -Path $packageName -DestinationPath "$packageName.zip" -Force
+
+          Write-Host "Release package created: $packageName.zip" -ForegroundColor Green
+
+      - name: Extract Release Notes
+        id: release_notes
+        shell: pwsh
+        run: |
+          $changelog = Get-Content CHANGELOG.md -Raw
+
+          # Extract the latest version's notes
+          if ($changelog -match '(?s)##\s+\d+\.\d+\.\d+[^\n]*\n(.*?)(?=\n##|\z)') {
+            $notes = $matches[1].Trim()
+          } else {
+            $notes = "See CHANGELOG.md for details"
+          }
+
+          # Save to file for GitHub Actions
+          $notes | Out-File -FilePath release_notes.txt -Encoding utf8
+          Write-Host "Release notes extracted"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          body_path: release_notes.txt
+          files: |
+            KeyTabTools-*.zip
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

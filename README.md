@@ -1,5 +1,11 @@
 # KeyTabTools
 
+[![PowerShell Gallery Version](https://img.shields.io/powershellgallery/v/KeyTabTools?label=PowerShell%20Gallery&logo=powershell)](https://www.powershellgallery.com/packages/KeyTabTools)
+[![PowerShell Gallery](https://img.shields.io/powershellgallery/dt/KeyTabTools?label=Downloads)](https://www.powershellgallery.com/packages/KeyTabTools)
+[![CI Status](https://github.com/waikinw/PSKeyTab/actions/workflows/pester.yml/badge.svg)](https://github.com/waikinw/PSKeyTab/actions/workflows/pester.yml)
+[![License](https://img.shields.io/github/license/waikinw/PSKeyTab)](https://github.com/waikinw/PSKeyTab/blob/main/LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-blue)](https://github.com/waikinw/PSKeyTab)
+
 KeyTabTools is a PowerShell utility for generating offline keytab files for Active Directory accounts. It provides a cross-platform alternative to Microsoft's `ktpass` tool and works on Windows, Linux, and macOS.
 
 ## Features
@@ -17,7 +23,30 @@ KeyTabTools is a PowerShell utility for generating offline keytab files for Acti
 
 ## Installation
 
-### Option 1: Clone and Import
+### Option 1: PowerShell Gallery (Recommended)
+
+```powershell
+# Install from PowerShell Gallery
+Install-Module -Name KeyTabTools -Scope CurrentUser
+
+# Import the module
+Import-Module KeyTabTools
+
+# Verify installation
+Get-Command -Module KeyTabTools
+```
+
+### Option 2: Download Release
+
+1. Download the latest release from [GitHub Releases](https://github.com/waikinw/PSKeyTab/releases)
+2. Extract the ZIP file
+3. Import the module:
+
+```powershell
+Import-Module ./KeyTabTools/KeyTabTools.psd1
+```
+
+### Option 3: Clone from GitHub
 
 ```powershell
 git clone https://github.com/waikinw/PSKeyTab.git
@@ -25,9 +54,10 @@ cd PSKeyTab
 Import-Module ./KeyTabTools.psd1
 ```
 
-### Option 2: Run as Script
+### Option 4: Run as Script (No Installation)
 
 ```powershell
+# Download KeyTabTools.ps1 and run directly
 ./KeyTabTools.ps1 -Realm DEV.HOME -Principal http/AppService -Password YourPassword
 ```
 
@@ -385,6 +415,30 @@ foreach ($entry in $entries) {
 }
 [System.IO.File]::WriteAllBytes('custom.keytab', $fileBytes)
 ```
+
+## Publishing & Releases
+
+### For Maintainers
+
+This module is published to [PowerShell Gallery](https://www.powershellgallery.com/packages/KeyTabTools) automatically via GitHub Actions.
+
+**To create a new release:**
+
+1. Update version in `KeyTabTools.psd1`
+2. Update `CHANGELOG.md`
+3. Commit and push changes
+4. Create and push a version tag:
+   ```bash
+   git tag v1.3.0
+   git push origin v1.3.0
+   ```
+
+The automated workflows will:
+- Run all tests
+- Create a GitHub release with artifacts
+- You can then manually trigger PowerShell Gallery publishing from GitHub Actions
+
+See [RELEASE.md](RELEASE.md) for detailed publishing instructions.
 
 ## Contributing
 
