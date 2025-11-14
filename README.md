@@ -457,17 +457,28 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Authors and Attribution
 
-**Current Maintainer:**
+### Project History
+
+This is a **derivative work** based on Adam Burford's [Create-KeyTab](https://github.com/TheRealAdamBurford/Create-KeyTab) project, developed as a standalone repository (not a GitHub fork) to enable independent evolution with significant enhancements for PowerShell Gallery publication and modern DevOps practices.
+
+The project maintains the original MIT license and fully credits the original author while pursuing an independent development path focused on production-ready module distribution, comprehensive testing, and community accessibility.
+
+### Current Maintainer
+
 - [waikinw](https://github.com/waikinw) - Current maintainer and primary contributor
 
-**Original Author:**
+### Original Author
+
 - [Adam Burford (TRAB)](https://github.com/TheRealAdamBurford) - Original author and creator
 - LinkedIn: https://www.linkedin.com/in/adamburford
 - Original repository: https://github.com/TheRealAdamBurford/Create-KeyTab
 
-**Credits:**
+### Credits
+
 - MD4 implementation by Larry.Song@outlook.com
 - Various cryptographic algorithm references (see source code comments)
+
+### Enhancements Over Original
 
 This project builds upon Adam Burford's excellent foundation with significant enhancements including:
 - Comprehensive test coverage (60+ tests)
