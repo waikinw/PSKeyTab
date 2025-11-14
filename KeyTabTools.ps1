@@ -470,6 +470,7 @@ function Get-HexStringFromByteArray {
 
     param(
         [Parameter(Mandatory=$true, Position=0)]
+        [AllowEmptyCollection()]
         [byte[]]$Data
     )
 $hexString = $null
